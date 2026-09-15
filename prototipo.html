@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alma Estética — Sistema Interno</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF6F1;
+    --surface:#FFFFFF;
+    --ink:#2E2A28;
+    --muted:#8A8078;
+    --muted-soft:#B9AFA5;
+    --border:#E9E0D6;
+    --primary:#8C5A6B;
+    --primary-dark:#6E4454;
+    --primary-tint:#F3E7EB;
+    --sage:#7C8B6F;
+    --sage-tint:#EBEEE6;
+    --amber:#B08A4E;
+    --amber-tint:#F5EDDF;
+    --radius-s:6px;
+    --radius-m:10px;
+    --shadow-1: 0 1px 2px rgba(46,42,40,0.06), 0 1px 1px rgba(46,42,40,0.04);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Work Sans', -apple-system, sans-serif;
+    font-size:14.5px;
+    line-height:1.5;
+  }
+  h1,h2,h3, .brand-name{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:500;
+    letter-spacing:-0.01em;
+  }
+  a{ color:inherit; }
+  button{ font-family:inherit; font-size:inherit; cursor:pointer; }
+  input, select, textarea{ font-family:inherit; font-size:inherit; }
+
+  /* ---------- layout ---------- */
+  .app{
+    display:grid;
+    grid-template-columns:250px 1fr;
+    min-height:100vh;
+  }
+  .sidebar{
+    background:var(--surface);
+    border-right:1px solid var(--border);
+    padding:28px 18px;
+    display:flex;
+    flex-direction:column;
+  }
+  .brand{ padding:0 8px 28px 8px; border-bottom:1px solid var(--border); margin-bottom:20px;}
+  .brand-name{ font-size:22px; color:var(--primary-dark); }
+  .brand-sub{ font-size:12px; color:var(--muted); margin-top:2px; }
+
+  .nav{ display:flex; flex-direction:column; gap:2px; flex:1; }
+  .nav-item{
+    display:flex; align-items:center; gap:11px;
+    padding:10px 12px;
+    border-radius:var(--radius-s);
+    color:var(--muted);
+    text-decoration:none;
+    border:none; background:none;
+    text-align:left;
+    width:100%;
+    position:relative;
+    font-size:14.5px;
+  }
+  .nav-item svg{ width:18px; height:18px; flex-shrink:0; }
+  .nav-item:hover{ background:var(--primary-tint); color:var(--primary-dark); }
+  .nav-item.active{ background:var(--primary-tint); color:var(--primary-dark); font-weight:600; }
+  .nav-item.active::before{
+    content:"";
+    position:absolute; left:-18px; top:8px; bottom:8px; width:3px;
+    background:var(--primary); border-radius:2px;
+  }
+
+  .nav-foot{ border-top:1px solid var(--border); padding-top:16px; margin-top:16px; }
+  .user-chip{ display:flex; align-items:center; gap:10px; padding:6px 8px; }
+  .avatar{ width:32px; height:32px; border-radius:50%; background:var(--sage-tint); color:var(--sage); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:13px; }
+  .user-chip .who{ font-size:13px; }
+  .user-chip .who .name{ font-weight:600; display:block; }
+  .user-chip .who .role{ color:var(--muted); font-size:12px; }
+
+  .main{ padding:32px 40px 60px 40px; max-width:1180px; }
+  .topbar{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:28px; gap:20px; flex-wrap:wrap; }
+  .topbar h1{ font-size:26px; margin:0 0 4px 0; }
+  .topbar .today{ color:var(--muted); font-size:13.5px; }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    border:1px solid transparent;
+    padding:9px 16px;
+    border-radius:var(--radius-s);
+    font-weight:600;
+    font-size:13.5px;
+    transition:background .15s ease;
+  }
+  .btn svg{ width:16px; height:16px; }
+  .btn-primary{ background:var(--primary); color:#fff; }
+  .btn-primary:hover{ background:var(--primary-dark); }
+  .btn-ghost{ background:transparent; border-color:var(--border); color:var(--ink); }
+  .btn-ghost:hover{ background:var(--surface); border-color:var(--muted-soft); }
+  .btn-danger{ background:transparent; color:#A34A3E; border-color:#EAD3CE; }
+  .btn-danger:hover{ background:#FBEFEC; }
+  .btn-sm{ padding:6px 11px; font-size:12.5px; }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  /* ---------- cards / dashboard ---------- */
+  .grid-cards{ display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:28px; }
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-m); padding:18px 20px; }
+  .card .label{ color:var(--muted); font-size:12.5px; margin-bottom:8px; }
+  .card .value{ font-family:'Fraunces', serif; font-size:32px; color:var(--primary-dark); line-height:1; }
+  .card .hint{ color:var(--muted); font-size:12.5px; margin-top:6px; }
+
+  .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-m); overflow:hidden; margin-bottom:24px; }
+  .panel-head{ padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .panel-head h2{ font-size:16px; margin:0; }
+  .panel-body{ padding:6px 0; }
+
+  .agenda-line{ display:flex; align-items:center; gap:14px; padding:12px 20px; border-bottom:1px solid var(--border); }
+  .agenda-line:last-child{ border-bottom:none; }
+  .agenda-line .time{ width:52px; font-weight:600; color:var(--primary-dark); font-size:13px; }
+  .agenda-line .who{ flex:1; }
+  .agenda-line .who .p-nome{ font-weight:600; }
+  .agenda-line .who .p-serv{ color:var(--muted); font-size:12.5px; }
+
+  .tag{ font-size:11.5px; padding:3px 9px; border-radius:20px; font-weight:600; }
+  .tag-confirmado{ background:var(--sage-tint); color:var(--sage); }
+  .tag-pendente{ background:var(--amber-tint); color:var(--amber); }
+  .tag-cancelado{ background:#F1EDEA; color:var(--muted); }
+
+  /* ---------- agenda semanal ---------- */
+  .agenda-toolbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .week-nav{ display:flex; align-items:center; gap:10px; }
+  .week-nav button{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-s); width:32px; height:32px; display:flex; align-items:center; justify-content:center; }
+  .week-nav button:hover{ border-color:var(--muted-soft); }
+  .week-label{ font-weight:600; min-width:190px; text-align:center; }
+  .legend{ display:flex; gap:14px; font-size:12.5px; color:var(--muted); }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .dot-confirmado{ background:var(--sage); }
+  .dot-pendente{ background:var(--amber); }
+  .dot-cancelado{ background:var(--muted-soft); }
+
+  .calendar{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-m);
+    display:grid; grid-template-columns:64px repeat(6, 1fr);
+    overflow:hidden;
+  }
+  .cal-head{ padding:12px 8px; text-align:center; border-bottom:1px solid var(--border); border-left:1px solid var(--border); background:#FCFAF7; }
+  .cal-head:first-child{ border-left:none; }
+  .cal-head .dow{ font-size:11.5px; color:var(--muted); font-weight:600; }
+  .cal-head .dnum{ font-family:'Fraunces', serif; font-size:18px; color:var(--ink); }
+  .cal-time{ padding:10px 8px; font-size:12px; color:var(--muted); border-top:1px solid var(--border); text-align:right; }
+  .cal-cell{
+    border-top:1px solid var(--border); border-left:1px solid var(--border);
+    min-height:56px; padding:4px; position:relative;
+  }
+  .cal-cell:hover{ background:#FCFAF7; cursor:pointer; }
+  .cal-cell.has-appt:hover{ background:inherit; }
+  .appt-block{
+    border-radius:6px; padding:6px 8px; font-size:11.8px; height:100%;
+    border-left:3px solid var(--sage);
+    background:var(--sage-tint); color:#3F4A38;
+    cursor:pointer;
+  }
+  .appt-block.pendente{ border-left-color:var(--amber); background:var(--amber-tint); color:#5C4823; }
+  .appt-block.cancelado{ border-left-color:var(--muted-soft); background:#F1EDEA; color:var(--muted); text-decoration:line-through; }
+  .appt-block .a-nome{ font-weight:700; display:block; }
+  .appt-block .a-serv{ display:block; opacity:.85; }
+
+  /* ---------- pacientes ---------- */
+  .searchbar{ display:flex; gap:10px; margin-bottom:16px; }
+  .searchbar input{ flex:1; max-width:340px; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-s); background:var(--surface); }
+  .searchbar input:focus{ outline:2px solid var(--primary); outline-offset:1px; }
+
+  table{ width:100%; border-collapse:collapse; }
+  th{ text-align:left; font-size:12px; color:var(--muted); font-weight:600; padding:10px 20px; border-bottom:1px solid var(--border); }
+  td{ padding:13px 20px; border-bottom:1px solid var(--border); font-size:13.8px; }
+  tbody tr{ cursor:pointer; }
+  tbody tr:hover td{ background:#FCFAF7; }
+  tbody tr:last-child td{ border-bottom:none; }
+  .p-avatar-row{ display:flex; align-items:center; gap:10px; }
+  .mini-avatar{ width:30px; height:30px; border-radius:50%; background:var(--primary-tint); color:var(--primary-dark); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+  .muted{ color:var(--muted); }
+  .empty-state{ padding:50px 20px; text-align:center; color:var(--muted); }
+  .empty-state svg{ width:36px; height:36px; color:var(--muted-soft); margin-bottom:10px; }
+
+  /* ---------- prontuário / cadastro ---------- */
+  .back-link{ display:inline-flex; align-items:center; gap:6px; color:var(--muted); text-decoration:none; font-size:13px; margin-bottom:14px; background:none; border:none; padding:0; }
+  .back-link:hover{ color:var(--primary-dark); }
+  .back-link svg{ width:15px; height:15px; }
+
+  .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px 20px; padding:20px; }
+  .form-grid.cols-3{ grid-template-columns:1fr 1fr 1fr; }
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field.full{ grid-column:1 / -1; }
+  .field label{ font-size:12.5px; font-weight:600; color:var(--muted); }
+  .field input, .field select, .field textarea{
+    padding:9px 11px; border:1px solid var(--border); border-radius:var(--radius-s); background:var(--surface); color:var(--ink);
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{ outline:2px solid var(--primary); outline-offset:1px; }
+  .field textarea{ resize:vertical; min-height:70px; }
+
+  .panel-actions{ padding:16px 20px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
+
+  .historico-item{ padding:14px 20px; border-bottom:1px solid var(--border); display:flex; gap:16px; }
+  .historico-item:last-child{ border-bottom:none; }
+  .historico-item .h-data{ width:96px; flex-shrink:0; font-weight:600; color:var(--primary-dark); font-size:13px; }
+  .historico-item .h-body .h-serv{ font-weight:600; }
+  .historico-item .h-body .h-obs{ color:var(--muted); font-size:13px; margin-top:2px; }
+
+  .alert-box{ display:flex; gap:10px; align-items:flex-start; background:var(--amber-tint); border:1px solid #E9D9B8; color:#5C4823; padding:12px 16px; border-radius:var(--radius-s); font-size:13px; margin:0 20px 18px 20px; }
+  .alert-box svg{ width:17px; height:17px; flex-shrink:0; margin-top:1px; }
+
+  /* ---------- modal ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(46,42,40,0.32);
+    display:none; align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .overlay.active{ display:flex; }
+  .modal{
+    background:var(--surface); border-radius:var(--radius-m); width:100%; max-width:460px;
+    box-shadow:0 20px 60px rgba(46,42,40,0.25);
+    max-height:90vh; overflow-y:auto;
+  }
+  .modal-head{ padding:18px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .modal-head h3{ margin:0; font-size:17px; }
+  .modal-close{ background:none; border:none; color:var(--muted); width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:6px; }
+  .modal-close:hover{ background:var(--bg); }
+  .modal-body{ padding:20px 22px; display:flex; flex-direction:column; gap:14px; }
+  .modal-foot{ padding:16px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
+  .modal-detail-row{ display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--border); font-size:13.8px; }
+  .modal-detail-row:last-child{ border-bottom:none; }
+  .modal-detail-row .k{ color:var(--muted); }
+  .modal-detail-row .v{ font-weight:600; }
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--ink); color:#fff; padding:12px 20px; border-radius:8px; font-size:13.5px;
+    opacity:0; pointer-events:none; transition:all .25s ease; z-index:80;
+    display:flex; align-items:center; gap:9px;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast svg{ width:16px; height:16px; color:var(--sage); }
+
+  @media (max-width: 900px){
+    .app{ grid-template-columns:1fr; }
+    .sidebar{ display:none; }
+    .main{ padding:20px; }
+    .grid-cards{ grid-template-columns:1fr; }
+    .form-grid{ grid-template-columns:1fr; }
+    .calendar{ grid-template-columns:44px repeat(6, minmax(90px,1fr)); overflow-x:auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-name">Alma Estética</div>
+      <div class="brand-sub">sistema interno</div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="12" width="8" height="9" rx="1.5"/><rect x="3" y="14" width="8" height="7" rx="1.5"/></svg>
+        Painel
+      </button>
+      <button class="nav-item" data-view="agenda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9.5h18"/><path d="M8 3v4M16 3v4"/></svg>
+        Agenda
+      </button>
+      <button class="nav-item" data-view="pacientes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3.6 2.9-6 5.5-6s5.5 2.4 5.5 6"/><circle cx="17.5" cy="8.5" r="2.5"/><path d="M15.5 14.2c2.4.3 4.5 2.3 4.9 5.3"/></svg>
+        Pacientes
+      </button>
+    </nav>
+    <div class="nav-foot">
+      <div class="user-chip">
+        <div class="avatar">RF</div>
+        <div class="who">
+          <span class="name">Recepção</span>
+          <span class="role">Acesso administrativo</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="main">
+
+    <!-- ---------- DASHBOARD ---------- -->
+    <section class="view active" id="view-dashboard">
+      <div class="topbar">
+        <div>
+          <h1>Bom dia, Recepção</h1>
+          <div class="today" id="hoje-extenso"></div>
+        </div>
+        <button class="btn btn-primary" data-goto="agenda">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Novo agendamento
+        </button>
+      </div>
+
+      <div class="grid-cards">
+        <div class="card">
+          <div class="label">Consultas hoje</div>
+          <div class="value" id="kpi-hoje">0</div>
+          <div class="hint">na agenda de hoje</div>
+        </div>
+        <div class="card">
+          <div class="label">Pacientes cadastrados</div>
+          <div class="value" id="kpi-pacientes">0</div>
+          <div class="hint">com prontuário ativo</div>
+        </div>
+        <div class="card">
+          <div class="label">Aguardando confirmação</div>
+          <div class="value" id="kpi-pendentes">0</div>
+          <div class="hint">nos próximos 7 dias</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Consultas de hoje</h2>
+          <button class="btn btn-ghost btn-sm" data-goto="agenda">Ver agenda completa</button>
+        </div>
+        <div class="panel-body" id="lista-hoje"></div>
+      </div>
+    </section>
+
+    <!-- ---------- AGENDA ---------- -->
+    <section class="view" id="view-agenda">
+      <div class="topbar">
+        <div>
+          <h1>Agenda</h1>
+          <div class="today">Clique em um horário livre para marcar uma consulta</div>
+        </div>
+        <button class="btn btn-primary" id="btn-novo-agendamento">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Novo agendamento
+        </button>
+      </div>
+
+      <div class="agenda-toolbar">
+        <div class="week-nav">
+          <button id="semana-anterior" aria-label="Semana anterior">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div class="week-label" id="semana-label"></div>
+          <button id="semana-proxima" aria-label="Próxima semana">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="legend">
+          <span><span class="dot dot-confirmado"></span> Confirmado</span>
+          <span><span class="dot dot-pendente"></span> Pendente</span>
+          <span><span class="dot dot-cancelado"></span> Cancelado</span>
+        </div>
+      </div>
+
+      <div class="calendar" id="calendar-grid"></div>
+    </section>
+
+    <!-- ---------- PACIENTES (lista) ---------- -->
+    <section class="view" id="view-pacientes">
+      <div class="topbar">
+        <div>
+          <h1>Pacientes</h1>
+          <div class="today" id="contagem-pacientes"></div>
+        </div>
+        <button class="btn btn-primary" id="btn-novo-paciente">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Novo paciente
+        </button>
+      </div>
+
+      <div class="searchbar">
+        <input type="text" id="busca-paciente" placeholder="Buscar por nome ou telefone...">
+      </div>
+
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Paciente</th>
+              <th>Telefone</th>
+              <th>Última visita</th>
+              <th>Alergias</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-pacientes"></tbody>
+        </table>
+        <div class="empty-state" id="pacientes-vazio" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <div>Nenhum paciente encontrado</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PRONTUÁRIO / CADASTRO ---------- -->
+    <section class="view" id="view-prontuario">
+      <button class="back-link" id="btn-voltar-pacientes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        Voltar para pacientes
+      </button>
+
+      <div class="topbar">
+        <div>
+          <h1 id="prontuario-titulo">Novo paciente</h1
+          ><div class="today" id="prontuario-sub">Preencha os dados para criar o prontuário</div>
+        </div>
+        <button class="btn btn-primary" id="btn-salvar-paciente">Salvar paciente</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Dados pessoais</h2></div>
+        <div class="form-grid">
+          <div class="field"><label for="pf-nome">Nome completo</label><input id="pf-nome" type="text" placeholder="Ex.: Camila Duarte"></div>
+          <div class="field"><label for="pf-nasc">Data de nascimento</label><input id="pf-nasc" type="date"></div>
+          <div class="field"><label for="pf-tel">Telefone</label><input id="pf-tel" type="tel" placeholder="(47) 99999-0000"></div>
+          <div class="field"><label for="pf-email">E-mail</label><input id="pf-email" type="email" placeholder="nome@email.com"></div>
+          <div class="field full"><label for="pf-alergias">Alergias / restrições</label><input id="pf-alergias" type="text" placeholder="Ex.: alergia a látex, pele sensível a ácidos"></div>
+          <div class="field full"><label for="pf-obs">Observações gerais</label><textarea id="pf-obs" placeholder="Histórico relevante, preferências, contraindicações..."></textarea></div>
+        </div>
+      </div>
+
+      <div class="panel" id="painel-historico">
+        <div class="panel-head">
+          <h2>Prontuário — histórico de procedimentos</h2>
+          <button class="btn btn-ghost btn-sm" id="btn-add-historico">+ Adicionar procedimento</button>
+        </div>
+        <div id="alerta-novo-paciente" class="alert-box" style="display:none; margin-top:14px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+          Salve o cadastro do paciente antes de adicionar procedimentos ao prontuário.
+        </div>
+        <div id="lista-historico"></div>
+        <div class="empty-state" id="historico-vazio" style="display:none;">Nenhum procedimento registrado ainda.</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== MODAL: NOVO/EDITAR AGENDAMENTO ===================== -->
+<div class="overlay" id="overlay-agendamento">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-agendamento-titulo">Novo agendamento</h3>
+      <button class="modal-close" data-close-modal="overlay-agendamento">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="ag-paciente">Paciente</label>
+        <select id="ag-paciente"></select>
+      </div>
+      <div class="field">
+        <label for="ag-servico">Procedimento</label>
+        <select id="ag-servico"></select>
+      </div>
+      <div class="field">
+        <label for="ag-profissional">Profissional</label>
+        <select id="ag-profissional"></select>
+      </div>
+      <div style="display:flex; gap:12px;">
+        <div class="field" style="flex:1;">
+          <label for="ag-data">Data</label>
+          <input type="date" id="ag-data">
+        </div>
+        <div class="field" style="flex:1;">
+          <label for="ag-hora">Horário</label>
+          <select id="ag-hora"></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close-modal="overlay-agendamento">Cancelar</button>
+      <button class="btn btn-primary" id="btn-confirmar-agendamento">Salvar agendamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL: DETALHE DO AGENDAMENTO ===================== -->
+<div class="overlay" id="overlay-detalhe">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Detalhes da consulta</h3>
+      <button class="modal-close" data-close-modal="overlay-detalhe">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="detalhe-corpo"></div>
+    <div class="modal-foot" id="detalhe-acoes"></div>
+  </div>
+</div>
+
+<!-- ===================== MODAL: NOVO ITEM DO HISTÓRICO ===================== -->
+<div class="overlay" id="overlay-historico">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Adicionar procedimento ao prontuário</h3>
+      <button class="modal-close" data-close-modal="overlay-historico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="hi-data">Data</label>
+        <input type="date" id="hi-data">
+      </div>
+      <div class="field">
+        <label for="hi-servico">Procedimento realizado</label>
+        <select id="hi-servico"></select>
+      </div>
+      <div class="field">
+        <label for="hi-profissional">Profissional responsável</label>
+        <select id="hi-profissional"></select>
+      </div>
+      <div class="field">
+        <label for="hi-obs">Observações clínicas</label>
+        <textarea id="hi-obs" placeholder="Reação da pele, produtos utilizados, recomendações..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close-modal="overlay-historico">Cancelar</button>
+      <button class="btn btn-primary" id="btn-confirmar-historico">Adicionar ao prontuário</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>
+  <span id="toast-msg">Salvo com sucesso</span>
+</div>
+
+<script>
+/* =========================================================
+   DADOS EM MEMÓRIA (simulando um backend, apenas para o protótipo)
+   ========================================================= */
+const SERVICOS = ["Limpeza de pele","Peeling químico","Botox","Preenchimento labial","Drenagem linfática","Microagulhamento","Depilação a laser"];
+const PROFISSIONAIS = ["Dra. Marina Alves","Dra. Beatriz Souza","Dr. Rafael Lima"];
+const HORAS = ["08:00","09:00","10:00","11:00","13:00","14:00","15:00","16:00","17:00","18:00"];
+
+let seq = 1000;
+function nextId(){ return seq++; }
+
+function toISODate(d){ return d.toISOString().slice(0,10); }
+function startOfWeek(d){
+  const date = new Date(d);
+  const day = date.getDay(); // 0 = domingo
+  const diff = day === 0 ? -6 : 1 - day; // volta pra segunda
+  date.setDate(date.getDate() + diff);
+  date.setHours(0,0,0,0);
+  return date;
+}
+
+const hoje = new Date();
+const hojeISO = toISODate(hoje);
+
+function addDays(base, n){
+  const d = new Date(base);
+  d.setDate(d.getDate()+n);
+  return d;
+}
+
+let pacientes = [
+  { id: nextId(), nome:"Camila Duarte", nascimento:"1994-03-12", telefone:"(47) 99911-2233", email:"camila.duarte@email.com",
+    alergias:"Pele sensível a ácidos", obs:"Prefere horários no início da manhã.",
+    historico:[
+      {data: toISODate(addDays(hoje,-30)), servico:"Limpeza de pele", profissional:"Dra. Marina Alves", obs:"Boa resposta, sem irritação."},
+      {data: toISODate(addDays(hoje,-9)),  servico:"Peeling químico", profissional:"Dra. Marina Alves", obs:"Leve vermelhidão, orientada hidratação intensa por 3 dias."}
+    ]},
+  { id: nextId(), nome:"Fernanda Ribeiro", nascimento:"1989-07-22", telefone:"(47) 98822-1010", email:"fe.ribeiro@email.com",
+    alergias:"Nenhuma conhecida", obs:"",
+    historico:[
+      {data: toISODate(addDays(hoje,-60)), servico:"Botox", profissional:"Dra. Beatriz Souza", obs:"Aplicação em região frontal, retorno em 90 dias."}
+    ]},
+  { id: nextId(), nome:"Juliana Prado", nascimento:"1997-11-02", telefone:"(47) 99700-4455", email:"ju.prado@email.com",
+    alergias:"Alergia a látex", obs:"Usar luvas de nitrila em todos os procedimentos.",
+    historico:[] },
+  { id: nextId(), nome:"Patrícia Nunes", nascimento:"1985-05-30", telefone:"(47) 99333-7788", email:"patricia.nunes@email.com",
+    alergias:"Nenhuma conhecida", obs:"",
+    historico:[
+      {data: toISODate(addDays(hoje,-14)), servico:"Drenagem linfática", profissional:"Dr. Rafael Lima", obs:"Sessão 1 de 6, boa tolerância."}
+    ]}
+];
+
+let agendamentos = [
+  { id: nextId(), pacienteId: pacientes[0].id, servico:"Limpeza de pele", profissional:"Dra. Marina Alves", data: hojeISO, hora:"09:00", status:"confirmado" },
+  { id: nextId(), pacienteId: pacientes[1].id, servico:"Botox", profissional:"Dra. Beatriz Souza", data: hojeISO, hora:"11:00", status:"pendente" },
+  { id: nextId(), pacienteId: pacientes[3].id, servico:"Drenagem linfática", profissional:"Dr. Rafael Lima", data: toISODate(addDays(hoje,1)), hora:"14:00", status:"confirmado" },
+  { id: nextId(), pacienteId: pacientes[2].id, servico:"Peeling químico", profissional:"Dra. Marina Alves", data: toISODate(addDays(hoje,2)), hora:"10:00", status:"pendente" },
+  { id: nextId(), pacienteId: pacientes[0].id, servico:"Microagulhamento", profissional:"Dra. Marina Alves", data: toISODate(addDays(hoje,-2)), hora:"15:00", status:"cancelado" },
+];
+
+let agendaSemanaBase = startOfWeek(hoje);
+let paginaAtualPacienteId = null; // null = novo cadastro
+let horarioSelecionado = null; // {data, hora} ao abrir modal a partir de uma célula vazia
+let agendamentoSelecionadoId = null;
+
+/* =========================================================
+   NAVEGAÇÃO ENTRE TELAS
+   ========================================================= */
+function irPara(viewId){
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.getElementById("view-"+viewId).classList.add("active");
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.view === viewId));
+  if(viewId === "dashboard") renderDashboard();
+  if(viewId === "agenda") renderAgenda();
+  if(viewId === "pacientes") renderPacientes();
+}
+
+document.querySelectorAll(".nav-item[data-view]").forEach(btn=>{
+  btn.addEventListener("click", ()=> irPara(btn.dataset.view));
+});
+document.querySelectorAll("[data-goto]").forEach(btn=>{
+  btn.addEventListener("click", ()=> irPara(btn.dataset.goto));
+});
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+let toastTimer = null;
+function mostrarToast(msg){
+  const t = document.getElementById("toast");
+  document.getElementById("toast-msg").textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove("show"), 2600);
+}
+
+/* =========================================================
+   MODAIS (abrir/fechar)
+   ========================================================= */
+function abrirModal(id){ document.getElementById(id).classList.add("active"); }
+function fecharModal(id){ document.getElementById(id).classList.remove("active"); }
+document.querySelectorAll("[data-close-modal]").forEach(btn=>{
+  btn.addEventListener("click", ()=> fecharModal(btn.dataset.closeModal));
+});
+document.querySelectorAll(".overlay").forEach(ov=>{
+  ov.addEventListener("click", (e)=>{ if(e.target === ov) ov.classList.remove("active"); });
+});
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+const DIAS_SEMANA = ["domingo","segunda-feira","terça-feira","quarta-feira","quinta-feira","sexta-feira","sábado"];
+const MESES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+
+function dataExtensa(d){
+  return `${DIAS_SEMANA[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]}`;
+}
+
+function nomePaciente(id){
+  const p = pacientes.find(p=>p.id===id);
+  return p ? p.nome : "Paciente removido";
+}
+
+function renderDashboard(){
+  document.getElementById("hoje-extenso").textContent = dataExtensa(hoje).replace(/^\w/, c=>c.toUpperCase());
+  const doDia = agendamentos.filter(a=>a.data===hojeISO && a.status!=="cancelado").sort((a,b)=>a.hora.localeCompare(b.hora));
+  document.getElementById("kpi-hoje").textContent = doDia.length;
+  document.getElementById("kpi-pacientes").textContent = pacientes.length;
+
+  const em7dias = toISODate(addDays(hoje,7));
+  const pendentes = agendamentos.filter(a=>a.status==="pendente" && a.data>=hojeISO && a.data<=em7dias).length;
+  document.getElementById("kpi-pendentes").textContent = pendentes;
+
+  const lista = document.getElementById("lista-hoje");
+  lista.innerHTML = "";
+  if(doDia.length===0){
+    lista.innerHTML = `<div class="empty-state">Nenhuma consulta agendada para hoje.</div>`;
+    return;
+  }
+  doDia.forEach(a=>{
+    const linha = document.createElement("div");
+    linha.className = "agenda-line";
+    linha.innerHTML = `
+      <div class="time">${a.hora}</div>
+      <div class="who">
+        <div class="p-nome">${nomePaciente(a.pacienteId)}</div>
+        <div class="p-serv">${a.servico} · ${a.profissional}</div>
+      </div>
+      <span class="tag tag-${a.status}">${rotuloStatus(a.status)}</span>
+    `;
+    lista.appendChild(linha);
+  });
+}
+
+function rotuloStatus(s){
+  return { confirmado:"Confirmado", pendente:"Pendente", cancelado:"Cancelado" }[s] || s;
+}
+
+/* =========================================================
+   AGENDA SEMANAL
+   ========================================================= */
+function renderAgenda(){
+  const dias = [...Array(6)].map((_,i)=> addDays(agendaSemanaBase, i)); // seg a sáb
+  const inicio = dias[0], fim = dias[5];
+  const fmt = d => `${d.getDate()} ${MESES[d.getMonth()].slice(0,3)}`;
+  document.getElementById("semana-label").textContent = `${fmt(inicio)} – ${fmt(fim)}`;
+
+  const grid = document.getElementById("calendar-grid");
+  grid.innerHTML = "";
+
+  grid.appendChild(el(`<div class="cal-head"></div>`));
+  dias.forEach(d=>{
+    const isHoje = toISODate(d) === hojeISO;
+    grid.appendChild(el(`
+      <div class="cal-head">
+        <div class="dow">${DIAS_SEMANA[d.getDay()].slice(0,3)}</div>
+        <div class="dnum" style="${isHoje ? 'color:var(--primary-dark)' : ''}">${d.getDate()}</div>
+      </div>`));
+  });
+
+  HORAS.forEach(hora=>{
+    grid.appendChild(el(`<div class="cal-time">${hora}</div>`));
+    dias.forEach(d=>{
+      const dataISO = toISODate(d);
+      const appt = agendamentos.find(a=>a.data===dataISO && a.hora===hora);
+      const cell = document.createElement("div");
+      cell.className = "cal-cell" + (appt ? " has-appt" : "");
+      if(appt){
+        cell.innerHTML = `
+          <div class="appt-block ${appt.status}" data-appt-id="${appt.id}">
+            <span class="a-nome">${nomePaciente(appt.pacienteId)}</span>
+            <span class="a-serv">${appt.servico}</span>
+          </div>`;
+        cell.querySelector(".appt-block").addEventListener("click", (e)=>{
+          e.stopPropagation();
+          abrirDetalheAgendamento(appt.id);
+        });
+      } else {
+        cell.addEventListener("click", ()=> abrirNovoAgendamento(dataISO, hora));
+      }
+      grid.appendChild(cell);
+    });
+  });
+}
+
+function el(html){
+  const t = document.createElement("template");
+  t.innerHTML = html.trim();
+  return t.content.firstChild;
+}
+
+document.getElementById("semana-anterior").addEventListener("click", ()=>{
+  agendaSemanaBase = addDays(agendaSemanaBase, -7);
+  renderAgenda();
+});
+document.getElementById("semana-proxima").addEventListener("click", ()=>{
+  agendaSemanaBase = addDays(agendaSemanaBase, 7);
+  renderAgenda();
+});
+
+/* ---- modal: novo agendamento ---- */
+function popularSelects(){
+  const selServico = document.getElementById("ag-servico");
+  const selProf = document.getElementById("ag-profissional");
+  const selHora = document.getElementById("ag-hora");
+  const selPaciente = document.getElementById("ag-paciente");
+  [selServico, selProf, selHora, selPaciente].forEach(s=> s.innerHTML = "");
+
+  pacientes.forEach(p=> selPaciente.appendChild(new Option(p.nome, p.id)));
+  SERVICOS.forEach(s=> selServico.appendChild(new Option(s, s)));
+  PROFISSIONAIS.forEach(p=> selProf.appendChild(new Option(p, p)));
+  HORAS.forEach(h=> selHora.appendChild(new Option(h, h)));
+
+  const selServicoHi = document.getElementById("hi-servico");
+  const selProfHi = document.getElementById("hi-profissional");
+  selServicoHi.innerHTML = ""; selProfHi.innerHTML = "";
+  SERVICOS.forEach(s=> selServicoHi.appendChild(new Option(s, s)));
+  PROFISSIONAIS.forEach(p=> selProfHi.appendChild(new Option(p, p)));
+}
+
+function abrirNovoAgendamento(dataISO, hora){
+  popularSelects();
+  document.getElementById("modal-agendamento-titulo").textContent = "Novo agendamento";
+  document.getElementById("ag-data").value = dataISO || hojeISO;
+  if(hora) document.getElementById("ag-hora").value = hora;
+  abrirModal("overlay-agendamento");
+}
+document.getElementById("btn-novo-agendamento").addEventListener("click", ()=> abrirNovoAgendamento(hojeISO, null));
+
+document.getElementById("btn-confirmar-agendamento").addEventListener("click", ()=>{
+  const pacienteId = Number(document.getElementById("ag-paciente").value);
+  const servico = document.getElementById("ag-servico").value;
+  const profissional = document.getElementById("ag-profissional").value;
+  const data = document.getElementById("ag-data").value;
+  const hora = document.getElementById("ag-hora").value;
+  if(!pacienteId || !data){ mostrarToast("Preencha paciente e data para continuar"); return; }
+
+  const conflito = agendamentos.find(a=>a.data===data && a.hora===hora && a.status!=="cancelado");
+  if(conflito){ mostrarToast("Já existe uma consulta nesse horário"); return; }
+
+  agendamentos.push({ id: nextId(), pacienteId, servico, profissional, data, hora, status:"pendente" });
+  fecharModal("overlay-agendamento");
+  renderAgenda();
+  renderDashboard();
+  mostrarToast("Agendamento criado");
+});
+
+/* ---- modal: detalhe do agendamento ---- */
+function abrirDetalheAgendamento(id){
+  agendamentoSelecionadoId = id;
+  const a = agendamentos.find(x=>x.id===id);
+  const corpo = document.getElementById("detalhe-corpo");
+  corpo.innerHTML = `
+    <div class="modal-detail-row"><span class="k">Paciente</span><span class="v">${nomePaciente(a.pacienteId)}</span></div>
+    <div class="modal-detail-row"><span class="k">Procedimento</span><span class="v">${a.servico}</span></div>
+    <div class="modal-detail-row"><span class="k">Profissional</span><span class="v">${a.profissional}</span></div>
+    <div class="modal-detail-row"><span class="k">Data</span><span class="v">${a.data.split("-").reverse().join("/")}</span></div>
+    <div class="modal-detail-row"><span class="k">Horário</span><span class="v">${a.hora}</span></div>
+    <div class="modal-detail-row"><span class="k">Status</span><span class="tag tag-${a.status}">${rotuloStatus(a.status)}</span></div>
+  `;
+  const acoes = document.getElementById("detalhe-acoes");
+  acoes.innerHTML = "";
+  if(a.status !== "cancelado"){
+    if(a.status === "pendente"){
+      acoes.appendChild(botaoAcao("Confirmar", "btn-primary", ()=> mudarStatus(a.id, "confirmado")));
+    }
+    acoes.appendChild(botaoAcao("Cancelar consulta", "btn-danger", ()=> mudarStatus(a.id, "cancelado")));
+  }
+  acoes.appendChild(botaoAcao("Fechar", "btn-ghost", ()=> fecharModal("overlay-detalhe")));
+  abrirModal("overlay-detalhe");
+}
+
+function botaoAcao(texto, classe, onClick){
+  const b = document.createElement("button");
+  b.className = "btn "+classe;
+  b.textContent = texto;
+  b.addEventListener("click", onClick);
+  return b;
+}
+
+function mudarStatus(id, status){
+  const a = agendamentos.find(x=>x.id===id);
+  a.status = status;
+  fecharModal("overlay-detalhe");
+  renderAgenda();
+  renderDashboard();
+  mostrarToast(status === "confirmado" ? "Consulta confirmada" : "Consulta cancelada");
+}
+
+/* =========================================================
+   PACIENTES — LISTA
+   ========================================================= */
+function ultimaVisita(paciente){
+  if(paciente.historico.length===0) return "—";
+  const ultima = [...paciente.historico].sort((a,b)=> b.data.localeCompare(a.data))[0];
+  return ultima.data.split("-").reverse().join("/");
+}
+
+function iniciais(nome){
+  return nome.split(" ").filter(Boolean).slice(0,2).map(p=>p[0]).join("").toUpperCase();
+}
+
+function renderPacientes(filtro=""){
+  const corpo = document.getElementById("tabela-pacientes");
+  const vazio = document.getElementById("pacientes-vazio");
+  const termo = filtro.trim().toLowerCase();
+  const lista = pacientes.filter(p=> p.nome.toLowerCase().includes(termo) || p.telefone.includes(termo));
+
+  document.getElementById("contagem-pacientes").textContent = `${pacientes.length} pacientes cadastrados`;
+  corpo.innerHTML = "";
+  vazio.style.display = lista.length ? "none" : "block";
+
+  lista.forEach(p=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>
+        <div class="p-avatar-row">
+          <div class="mini-avatar">${iniciais(p.nome)}</div>
+          <div>${p.nome}</div>
+        </div>
+      </td>
+      <td class="muted">${p.telefone}</td>
+      <td class="muted">${ultimaVisita(p)}</td>
+      <td class="muted">${p.alergias && p.alergias.toLowerCase()!=="nenhuma conhecida" ? p.alergias : "—"}</td>
+    `;
+    tr.addEventListener("click", ()=> abrirProntuario(p.id));
+    corpo.appendChild(tr);
+  });
+}
+
+document.getElementById("busca-paciente").addEventListener("input", (e)=> renderPacientes(e.target.value));
+document.getElementById("btn-novo-paciente").addEventListener("click", ()=> abrirProntuario(null));
+document.getElementById("btn-voltar-pacientes").addEventListener("click", ()=> irPara("pacientes"));
+
+/* =========================================================
+   PRONTUÁRIO / CADASTRO DE PACIENTE
+   ========================================================= */
+function abrirProntuario(id){
+  paginaAtualPacienteId = id;
+  const alerta = document.getElementById("alerta-novo-paciente");
+  const btnAddHist = document.getElementById("btn-add-historico");
+
+  if(id === null){
+    document.getElementById("prontuario-titulo").textContent = "Novo paciente";
+    document.getElementById("prontuario-sub").textContent = "Preencha os dados para criar o prontuário";
+    ["pf-nome","pf-nasc","pf-tel","pf-email","pf-alergias","pf-obs"].forEach(f=> document.getElementById(f).value = "");
+    document.getElementById("lista-historico").innerHTML = "";
+    document.getElementById("historico-vazio").style.display = "none";
+    alerta.style.display = "flex";
+    btnAddHist.disabled = true;
+    btnAddHist.style.opacity = .5;
+  } else {
+    const p = pacientes.find(x=>x.id===id);
+    document.getElementById("prontuario-titulo").textContent = p.nome;
+    document.getElementById("prontuario-sub").textContent = "Prontuário do paciente";
+    document.getElementById("pf-nome").value = p.nome;
+    document.getElementById("pf-nasc").value = p.nascimento;
+    document.getElementById("pf-tel").value = p.telefone;
+    document.getElementById("pf-email").value = p.email;
+    document.getElementById("pf-alergias").value = p.alergias;
+    document.getElementById("pf-obs").value = p.obs;
+    alerta.style.display = "none";
+    btnAddHist.disabled = false;
+    btnAddHist.style.opacity = 1;
+    renderHistorico(p);
+  }
+  irPara("prontuario");
+}
+
+function renderHistorico(p){
+  const lista = document.getElementById("lista-historico");
+  const vazio = document.getElementById("historico-vazio");
+  const itens = [...p.historico].sort((a,b)=> b.data.localeCompare(a.data));
+  lista.innerHTML = "";
+  vazio.style.display = itens.length ? "none" : "block";
+  itens.forEach(h=>{
+    const div = document.createElement("div");
+    div.className = "historico-item";
+    div.innerHTML = `
+      <div class="h-data">${h.data.split("-").reverse().join("/")}</div>
+      <div class="h-body">
+        <div class="h-serv">${h.servico} · ${h.profissional}</div>
+        ${h.obs ? `<div class="h-obs">${h.obs}</div>` : ""}
+      </div>
+    `;
+    lista.appendChild(div);
+  });
+}
+
+document.getElementById("btn-salvar-paciente").addEventListener("click", ()=>{
+  const nome = document.getElementById("pf-nome").value.trim();
+  if(!nome){ mostrarToast("Informe o nome do paciente"); return; }
+
+  const dados = {
+    nome,
+    nascimento: document.getElementById("pf-nasc").value,
+    telefone: document.getElementById("pf-tel").value.trim(),
+    email: document.getElementById("pf-email").value.trim(),
+    alergias: document.getElementById("pf-alergias").value.trim(),
+    obs: document.getElementById("pf-obs").value.trim(),
+  };
+
+  if(paginaAtualPacienteId === null){
+    const novo = { id: nextId(), ...dados, historico: [] };
+    pacientes.push(novo);
+    paginaAtualPacienteId = novo.id;
+    mostrarToast("Paciente cadastrado");
+    abrirProntuario(novo.id);
+  } else {
+    const p = pacientes.find(x=>x.id===paginaAtualPacienteId);
+    Object.assign(p, dados);
+    mostrarToast("Prontuário atualizado");
+  }
+});
+
+document.getElementById("btn-add-historico").addEventListener("click", ()=>{
+  document.getElementById("hi-data").value = hojeISO;
+  abrirModal("overlay-historico");
+});
+
+document.getElementById("btn-confirmar-historico").addEventListener("click", ()=>{
+  if(paginaAtualPacienteId === null) return;
+  const p = pacientes.find(x=>x.id===paginaAtualPacienteId);
+  p.historico.push({
+    data: document.getElementById("hi-data").value || hojeISO,
+    servico: document.getElementById("hi-servico").value,
+    profissional: document.getElementById("hi-profissional").value,
+    obs: document.getElementById("hi-obs").value.trim()
+  });
+  document.getElementById("hi-obs").value = "";
+  fecharModal("overlay-historico");
+  renderHistorico(p);
+  mostrarToast("Procedimento adicionado ao prontuário");
+});
+
+/* =========================================================
+   INICIALIZAÇÃO
+   ========================================================= */
+popularSelects();
+renderDashboard();
+renderAgenda();
+renderPacientes();
+</script>
+</body>
+</html>
