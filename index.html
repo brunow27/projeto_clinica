@@ -411,7 +411,35 @@
       </div>
     </section>
 
-    <!-- ---------- PRONTUÁRIO / CADASTRO ---------- -->
+    <!-- ---------- CADASTRO DE PACIENTE (registro simples) ---------- -->
+    <section class="view" id="view-cadastro">
+      <button class="back-link" id="btn-voltar-pacientes-cadastro">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        Voltar para pacientes
+      </button>
+
+      <div class="topbar">
+        <div>
+          <h1>Novo paciente</h1>
+          <div class="today">Cadastro rápido — só os dados essenciais</div>
+        </div>
+        <button class="btn btn-primary" id="btn-salvar-cadastro">Salvar paciente</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Dados pessoais</h2></div>
+        <div class="form-grid">
+          <div class="field"><label for="cf-nome">Nome completo</label><input id="cf-nome" type="text" placeholder="Ex.: Camila Duarte"></div>
+          <div class="field"><label for="cf-nasc">Data de nascimento</label><input id="cf-nasc" type="date"></div>
+          <div class="field"><label for="cf-tel">Telefone</label><input id="cf-tel" type="tel" placeholder="(47) 99999-0000"></div>
+          <div class="field"><label for="cf-email">E-mail</label><input id="cf-email" type="email" placeholder="nome@email.com"></div>
+          <div class="field full"><label for="cf-alergias">Alergias / restrições</label><input id="cf-alergias" type="text" placeholder="Ex.: alergia a látex, pele sensível a ácidos"></div>
+          <div class="field full"><label for="cf-obs">Observações gerais</label><textarea id="cf-obs" placeholder="Histórico relevante, preferências, contraindicações..."></textarea></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- REGISTRO DO PACIENTE (visualização/edição) ---------- -->
     <section class="view" id="view-prontuario">
       <button class="back-link" id="btn-voltar-pacientes">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
@@ -420,10 +448,10 @@
 
       <div class="topbar">
         <div>
-          <h1 id="prontuario-titulo">Novo paciente</h1
-          ><div class="today" id="prontuario-sub">Preencha os dados para criar o prontuário</div>
+          <h1 id="prontuario-titulo">Paciente</h1
+          ><div class="today" id="prontuario-sub">Dados do paciente</div>
         </div>
-        <button class="btn btn-primary" id="btn-salvar-paciente">Salvar paciente</button>
+        <button class="btn btn-primary" id="btn-salvar-paciente">Salvar alterações</button>
       </div>
 
       <div class="panel">
@@ -440,12 +468,8 @@
 
       <div class="panel" id="painel-historico">
         <div class="panel-head">
-          <h2>Prontuário — histórico de procedimentos</h2>
+          <h2>Histórico de procedimentos</h2>
           <button class="btn btn-ghost btn-sm" id="btn-add-historico">+ Adicionar procedimento</button>
-        </div>
-        <div id="alerta-novo-paciente" class="alert-box" style="display:none; margin-top:14px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
-          Salve o cadastro do paciente antes de adicionar procedimentos ao prontuário.
         </div>
         <div id="lista-historico"></div>
         <div class="empty-state" id="historico-vazio" style="display:none;">Nenhum procedimento registrado ainda.</div>
@@ -899,41 +923,52 @@ function renderPacientes(filtro=""){
 }
 
 document.getElementById("busca-paciente").addEventListener("input", (e)=> renderPacientes(e.target.value));
-document.getElementById("btn-novo-paciente").addEventListener("click", ()=> abrirProntuario(null));
+document.getElementById("btn-novo-paciente").addEventListener("click", ()=> abrirCadastro());
 document.getElementById("btn-voltar-pacientes").addEventListener("click", ()=> irPara("pacientes"));
+document.getElementById("btn-voltar-pacientes-cadastro").addEventListener("click", ()=> irPara("pacientes"));
 
 /* =========================================================
-   PRONTUÁRIO / CADASTRO DE PACIENTE
+   CADASTRO DE PACIENTE (tela simples, só dados pessoais)
+   ========================================================= */
+function abrirCadastro(){
+  ["cf-nome","cf-nasc","cf-tel","cf-email","cf-alergias","cf-obs"].forEach(f=> document.getElementById(f).value = "");
+  irPara("cadastro");
+}
+
+document.getElementById("btn-salvar-cadastro").addEventListener("click", ()=>{
+  const nome = document.getElementById("cf-nome").value.trim();
+  if(!nome){ mostrarToast("Informe o nome do paciente"); return; }
+
+  const novo = {
+    id: nextId(),
+    nome,
+    nascimento: document.getElementById("cf-nasc").value,
+    telefone: document.getElementById("cf-tel").value.trim(),
+    email: document.getElementById("cf-email").value.trim(),
+    alergias: document.getElementById("cf-alergias").value.trim(),
+    obs: document.getElementById("cf-obs").value.trim(),
+    historico: []
+  };
+  pacientes.push(novo);
+  mostrarToast("Paciente cadastrado");
+  abrirProntuario(novo.id);
+});
+
+/* =========================================================
+   REGISTRO DO PACIENTE (visualização/edição de quem já existe)
    ========================================================= */
 function abrirProntuario(id){
   paginaAtualPacienteId = id;
-  const alerta = document.getElementById("alerta-novo-paciente");
-  const btnAddHist = document.getElementById("btn-add-historico");
-
-  if(id === null){
-    document.getElementById("prontuario-titulo").textContent = "Novo paciente";
-    document.getElementById("prontuario-sub").textContent = "Preencha os dados para criar o prontuário";
-    ["pf-nome","pf-nasc","pf-tel","pf-email","pf-alergias","pf-obs"].forEach(f=> document.getElementById(f).value = "");
-    document.getElementById("lista-historico").innerHTML = "";
-    document.getElementById("historico-vazio").style.display = "none";
-    alerta.style.display = "flex";
-    btnAddHist.disabled = true;
-    btnAddHist.style.opacity = .5;
-  } else {
-    const p = pacientes.find(x=>x.id===id);
-    document.getElementById("prontuario-titulo").textContent = p.nome;
-    document.getElementById("prontuario-sub").textContent = "Prontuário do paciente";
-    document.getElementById("pf-nome").value = p.nome;
-    document.getElementById("pf-nasc").value = p.nascimento;
-    document.getElementById("pf-tel").value = p.telefone;
-    document.getElementById("pf-email").value = p.email;
-    document.getElementById("pf-alergias").value = p.alergias;
-    document.getElementById("pf-obs").value = p.obs;
-    alerta.style.display = "none";
-    btnAddHist.disabled = false;
-    btnAddHist.style.opacity = 1;
-    renderHistorico(p);
-  }
+  const p = pacientes.find(x=>x.id===id);
+  document.getElementById("prontuario-titulo").textContent = p.nome;
+  document.getElementById("prontuario-sub").textContent = "Dados do paciente";
+  document.getElementById("pf-nome").value = p.nome;
+  document.getElementById("pf-nasc").value = p.nascimento;
+  document.getElementById("pf-tel").value = p.telefone;
+  document.getElementById("pf-email").value = p.email;
+  document.getElementById("pf-alergias").value = p.alergias;
+  document.getElementById("pf-obs").value = p.obs;
+  renderHistorico(p);
   irPara("prontuario");
 }
 
@@ -970,17 +1005,9 @@ document.getElementById("btn-salvar-paciente").addEventListener("click", ()=>{
     obs: document.getElementById("pf-obs").value.trim(),
   };
 
-  if(paginaAtualPacienteId === null){
-    const novo = { id: nextId(), ...dados, historico: [] };
-    pacientes.push(novo);
-    paginaAtualPacienteId = novo.id;
-    mostrarToast("Paciente cadastrado");
-    abrirProntuario(novo.id);
-  } else {
-    const p = pacientes.find(x=>x.id===paginaAtualPacienteId);
-    Object.assign(p, dados);
-    mostrarToast("Prontuário atualizado");
-  }
+  const p = pacientes.find(x=>x.id===paginaAtualPacienteId);
+  Object.assign(p, dados);
+  mostrarToast("Dados atualizados");
 });
 
 document.getElementById("btn-add-historico").addEventListener("click", ()=>{
