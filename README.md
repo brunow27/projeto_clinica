@@ -44,19 +44,33 @@ O sistema é essencialmente CRUD (serviços, profissionais, agendamentos), sem n
 
 ## Protótipo funcional
 
-`index.html` é um protótipo estático (HTML/CSS/JS puro, sem dependências) das telas do painel interno da clínica, com dados de exemplo já carregados. Pode ser aberto direto no navegador (duplo clique) ou acessado pelo link do GitHub Pages acima.
+O protótipo é estático (HTML/CSS/JS puro, sem dependências) e está dividido em duas páginas, refletindo a área pública e a área administrativa descritas no documento de requisitos:
 
-Telas disponíveis:
+### `site.html` — área pública (sem login)
+- **Início** — apresentação institucional da clínica (RF01)
+- **Serviços** — lista de procedimentos com preços, ou "Sob consulta" quando não informado (RF02, RF03)
+- **Profissionais** — nome e especialidade da equipe (RF04)
+- **Horários** — dias e horários de atendimento, sempre visíveis (RF05)
+- **Contato e localização** — telefone, WhatsApp, e-mail, endereço e mapa incorporado (RF08, RF09)
+- **Agendar** — formulário público de solicitação de agendamento com validação de nome, telefone, e-mail e procedimento (RF06, RF07)
+
+### `index.html` — área administrativa autenticada (protótipo)
 - **Painel** — resumo do dia, com atalho para novo agendamento
-- **Agenda** — visão semanal por horário; clicar em um horário livre abre o modal de novo agendamento; clicar em uma consulta existente mostra detalhes com opções de confirmar/cancelar
+- **Agenda** — visão semanal por horário; clicar em um horário livre abre o modal de novo agendamento; clicar em uma consulta existente mostra detalhes com opções de confirmar/cancelar (RF11)
 - **Pacientes** — lista com busca por nome/telefone
+- **Serviços** — cadastro, edição e remoção de procedimentos e preços, refletidos na lista usada pelos formulários de agendamento (RF10)
 - **Cadastro** — formulário simples para registrar um novo paciente (dados pessoais)
 - **Registro do paciente** — dados pessoais editáveis + histórico de procedimentos
+
+> Nota: o link "Área administrativa" no rodapé/menu do site público e o link "Ver site público" na barra lateral do painel conectam as duas páginas para navegação durante a avaliação. Em produção, apenas a área administrativa exigiria login.
+>
+> A tela de "Registro do paciente" (prontuário/histórico de procedimentos) foi mantida no protótipo por já existir na versão anterior, mas o documento de requisitos define histórico clínico do paciente como **fora do escopo** desta etapa — vale reavaliar se essa tela deve ou não compor a entrega final.
 
 ## Estrutura do repositório
 
 ```
-index.html    → protótipo funcional (também é a página servida pelo GitHub Pages)
+site.html     → área pública do site (recomenda-se publicar esta como página inicial no GitHub Pages)
+index.html    → painel administrativo interno
 README.md
 uc_agendamento.jpeg
 uc_gerenciamento_agendamentos.jpeg
