@@ -287,8 +287,16 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3.6 2.9-6 5.5-6s5.5 2.4 5.5 6"/><circle cx="17.5" cy="8.5" r="2.5"/><path d="M15.5 14.2c2.4.3 4.5 2.3 4.9 5.3"/></svg>
         Pacientes
       </button>
+      <button class="nav-item" data-view="servicos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+        Serviços
+      </button>
     </nav>
     <div class="nav-foot">
+      <a class="back-link" href="site.html" target="_blank" rel="noopener" style="margin-bottom:12px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l7 7-7 7M21 12H3"/></svg>
+        Ver site público
+      </a>
       <div class="user-chip">
         <div class="avatar">RF</div>
         <div class="who">
@@ -439,6 +447,28 @@
       </div>
     </section>
 
+    <!-- ---------- SERVIÇOS (RF10 - cadastrar/alterar/remover) ---------- -->
+    <section class="view" id="view-servicos">
+      <div class="topbar">
+        <div>
+          <h1>Serviços</h1>
+          <div class="today">Procedimentos exibidos na área pública do site</div>
+        </div>
+        <button class="btn btn-primary" id="btn-novo-servico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Novo serviço
+        </button>
+      </div>
+
+      <div class="panel">
+        <table>
+          <thead><tr><th>Procedimento</th><th>Preço</th><th style="text-align:right;">Ações</th></tr></thead>
+          <tbody id="tbody-servicos"></tbody>
+        </table>
+        <div class="empty-state" id="servicos-vazio" style="display:none;">Nenhum serviço cadastrado ainda.</div>
+      </div>
+    </section>
+
     <!-- ---------- REGISTRO DO PACIENTE (visualização/edição) ---------- -->
     <section class="view" id="view-prontuario">
       <button class="back-link" id="btn-voltar-pacientes">
@@ -567,6 +597,32 @@
   </div>
 </div>
 
+<!-- ===================== MODAL: NOVO/EDITAR SERVIÇO ===================== -->
+<div class="overlay" id="overlay-servico">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-servico-titulo">Novo serviço</h3>
+      <button class="modal-close" data-close-modal="overlay-servico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="sv-nome">Nome do procedimento</label>
+        <input id="sv-nome" type="text" placeholder="Ex.: Limpeza de pele">
+      </div>
+      <div class="field">
+        <label for="sv-preco">Preço (R$)</label>
+        <input id="sv-preco" type="number" min="0" step="0.01" placeholder="Deixe em branco para exibir “sob consulta”">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close-modal="overlay-servico">Cancelar</button>
+      <button class="btn btn-primary" id="btn-confirmar-servico">Salvar serviço</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>
   <span id="toast-msg">Salvo com sucesso</span>
@@ -576,7 +632,18 @@
 /* =========================================================
    DADOS EM MEMÓRIA (simulando um backend, apenas para o protótipo)
    ========================================================= */
-const SERVICOS = ["Limpeza de pele","Peeling químico","Botox","Preenchimento labial","Drenagem linfática","Microagulhamento","Depilação a laser"];
+let servicos = [
+  { id: 1, nome:"Limpeza de pele",        preco: 150 },
+  { id: 2, nome:"Peeling químico",        preco: 220 },
+  { id: 3, nome:"Botox",                  preco: null },
+  { id: 4, nome:"Preenchimento labial",   preco: null },
+  { id: 5, nome:"Drenagem linfática",     preco: 130 },
+  { id: 6, nome:"Microagulhamento",       preco: 250 },
+  { id: 7, nome:"Depilação a laser",      preco: 90 },
+];
+let servicoSelecionadoId = null;
+// SERVICOS mantém compatibilidade com o restante do protótipo (selects de procedimento)
+function SERVICOS_NOMES(){ return servicos.map(s=>s.nome); }
 const PROFISSIONAIS = ["Dra. Marina Alves","Dra. Beatriz Souza","Dr. Rafael Lima"];
 const HORAS = ["08:00","09:00","10:00","11:00","13:00","14:00","15:00","16:00","17:00","18:00"];
 
@@ -647,6 +714,77 @@ function irPara(viewId){
   if(viewId === "dashboard") renderDashboard();
   if(viewId === "agenda") renderAgenda();
   if(viewId === "pacientes") renderPacientes();
+  if(viewId === "servicos") renderServicos();
+}
+
+/* =========================================================
+   SERVIÇOS (RF10 — cadastrar, alterar, remover)
+   ========================================================= */
+function formatarPreco(preco){
+  return preco == null ? "Sob consulta" : preco.toLocaleString("pt-BR", {style:"currency", currency:"BRL"});
+}
+
+function renderServicos(){
+  const tbody = document.getElementById("tbody-servicos");
+  tbody.innerHTML = "";
+  document.getElementById("servicos-vazio").style.display = servicos.length ? "none" : "block";
+  servicos.forEach(s=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${s.nome}</td>
+      <td class="${s.preco==null ? 'muted' : ''}">${formatarPreco(s.preco)}</td>
+      <td style="text-align:right;">
+        <button class="btn btn-ghost btn-sm" data-editar="${s.id}">Editar</button>
+        <button class="btn btn-danger btn-sm" data-remover="${s.id}">Remover</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll("[data-editar]").forEach(b=> b.addEventListener("click", ()=> abrirEditarServico(Number(b.dataset.editar))));
+  tbody.querySelectorAll("[data-remover]").forEach(b=> b.addEventListener("click", ()=> removerServico(Number(b.dataset.remover))));
+}
+
+function abrirNovoServico(){
+  servicoSelecionadoId = null;
+  document.getElementById("modal-servico-titulo").textContent = "Novo serviço";
+  document.getElementById("sv-nome").value = "";
+  document.getElementById("sv-preco").value = "";
+  abrirModal("overlay-servico");
+}
+document.getElementById("btn-novo-servico").addEventListener("click", abrirNovoServico);
+
+function abrirEditarServico(id){
+  const s = servicos.find(x=> x.id === id);
+  if(!s) return;
+  servicoSelecionadoId = id;
+  document.getElementById("modal-servico-titulo").textContent = "Editar serviço";
+  document.getElementById("sv-nome").value = s.nome;
+  document.getElementById("sv-preco").value = s.preco == null ? "" : s.preco;
+  abrirModal("overlay-servico");
+}
+
+document.getElementById("btn-confirmar-servico").addEventListener("click", ()=>{
+  const nome = document.getElementById("sv-nome").value.trim();
+  const precoRaw = document.getElementById("sv-preco").value;
+  const preco = precoRaw === "" ? null : Number(precoRaw);
+  if(!nome){ mostrarToast("Informe o nome do procedimento"); return; }
+
+  if(servicoSelecionadoId == null){
+    servicos.push({ id: nextId(), nome, preco });
+    mostrarToast("Serviço cadastrado com sucesso");
+  } else {
+    const s = servicos.find(x=> x.id === servicoSelecionadoId);
+    s.nome = nome; s.preco = preco;
+    mostrarToast("Serviço atualizado com sucesso");
+  }
+  fecharModal("overlay-servico");
+  renderServicos();
+});
+
+function removerServico(id){
+  if(!confirm("Remover este serviço? Ele deixará de aparecer no site público e nos formulários de agendamento.")) return;
+  servicos = servicos.filter(s=> s.id !== id);
+  renderServicos();
+  mostrarToast("Serviço removido");
 }
 
 document.querySelectorAll(".nav-item[data-view]").forEach(btn=>{
@@ -801,14 +939,14 @@ function popularSelects(){
   [selServico, selProf, selHora, selPaciente].forEach(s=> s.innerHTML = "");
 
   pacientes.forEach(p=> selPaciente.appendChild(new Option(p.nome, p.id)));
-  SERVICOS.forEach(s=> selServico.appendChild(new Option(s, s)));
+  servicos.forEach(s=> selServico.appendChild(new Option(s.nome, s.nome)));
   PROFISSIONAIS.forEach(p=> selProf.appendChild(new Option(p, p)));
   HORAS.forEach(h=> selHora.appendChild(new Option(h, h)));
 
   const selServicoHi = document.getElementById("hi-servico");
   const selProfHi = document.getElementById("hi-profissional");
   selServicoHi.innerHTML = ""; selProfHi.innerHTML = "";
-  SERVICOS.forEach(s=> selServicoHi.appendChild(new Option(s, s)));
+  servicos.forEach(s=> selServicoHi.appendChild(new Option(s.nome, s.nome)));
   PROFISSIONAIS.forEach(p=> selProfHi.appendChild(new Option(p, p)));
 }
 
