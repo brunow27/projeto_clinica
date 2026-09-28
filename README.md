@@ -1,4 +1,4 @@
-# Alma Estética — Site institucional + Agendamento
+# Studio Cleidy Petry — Site institucional + Agendamento
 
 Projeto acadêmico (PAC Extensionista) referente à Avaliação N1 — Planejamento e Levantamento de Requisitos. Propõe um sistema web para uma clínica de estética, com uma área pública (informações da clínica, serviços, preços, profissionais, horários e solicitação de agendamento) e uma área administrativa autenticada (gestão de serviços e agendamentos).
 
@@ -69,8 +69,6 @@ O protótipo é estático (HTML/CSS/JS puro, sem dependências) e está dividido
 - **Registro do paciente** — dados pessoais editáveis + histórico de procedimentos
 
 > Nota: o link "Área administrativa" no rodapé/menu do site público e o link "Ver site público" na barra lateral do painel conectam as duas páginas para navegação durante a avaliação. Em produção, apenas a área administrativa exigiria login.
->
-> A tela de "Registro do paciente" (prontuário/histórico de procedimentos) foi mantida no protótipo por já existir na versão anterior, mas o documento de requisitos define histórico clínico do paciente como **fora do escopo** desta etapa — vale reavaliar se essa tela deve ou não compor a entrega final.
 
 ## Estrutura do repositório
 
