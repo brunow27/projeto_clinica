@@ -17,6 +17,12 @@ Foram escolhidas 3 funcionalidades críticas do sistema para representação té
 **Gerenciamento de serviços (administrador)**
 ![Diagrama de caso de uso - Gerenciamento de serviços](uc_gerenciamento_servicos.jpeg)
 
+## Diagrama de classes
+
+Modelagem das entidades do sistema (Clínica, Serviço, Profissional, Agendamento, Administrador) e seus relacionamentos:
+
+![Diagrama de classes](diagrama_classes.jpeg)
+
 ## Arquitetura
 
 **Escolha: REST**
@@ -75,4 +81,5 @@ README.md
 uc_agendamento.jpeg
 uc_gerenciamento_agendamentos.jpeg
 uc_gerenciamento_servicos.jpeg
+diagrama_classes.jpeg
 ```
