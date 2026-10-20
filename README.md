@@ -66,7 +66,7 @@ O protótipo é estático (HTML/CSS/JS puro, sem dependências) e está dividido
 - **Pacientes** — lista com busca por nome/telefone
 - **Serviços** — cadastro, edição e remoção de procedimentos e preços, refletidos na lista usada pelos formulários de agendamento (RF10)
 - **Cadastro** — formulário simples para registrar um novo paciente (dados pessoais)
-- **Registro do paciente** — dados pessoais editáveis + histórico de procedimentos
+- **Registro do paciente** — dados pessoais editáveis (nome, telefone, e-mail)
 
 > Nota: o link "Área administrativa" no rodapé/menu do site público e o link "Ver site público" na barra lateral do painel conectam as duas páginas para navegação durante a avaliação. Em produção, apenas a área administrativa exigiria login.
 

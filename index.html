@@ -197,7 +197,7 @@
   .empty-state{ padding:50px 20px; text-align:center; color:var(--muted); }
   .empty-state svg{ width:36px; height:36px; color:var(--muted-soft); margin-bottom:10px; }
 
-  /* ---------- prontuário / cadastro ---------- */
+  /* ---------- cadastro de paciente ---------- */
   .back-link{ display:inline-flex; align-items:center; gap:6px; color:var(--muted); text-decoration:none; font-size:13px; margin-bottom:14px; background:none; border:none; padding:0; }
   .back-link:hover{ color:var(--primary-dark); }
   .back-link svg{ width:15px; height:15px; }
@@ -214,12 +214,6 @@
   .field textarea{ resize:vertical; min-height:70px; }
 
   .panel-actions{ padding:16px 20px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
-
-  .historico-item{ padding:14px 20px; border-bottom:1px solid var(--border); display:flex; gap:16px; }
-  .historico-item:last-child{ border-bottom:none; }
-  .historico-item .h-data{ width:96px; flex-shrink:0; font-weight:600; color:var(--primary-dark); font-size:13px; }
-  .historico-item .h-body .h-serv{ font-weight:600; }
-  .historico-item .h-body .h-obs{ color:var(--muted); font-size:13px; margin-top:2px; }
 
   .alert-box{ display:flex; gap:10px; align-items:flex-start; background:var(--amber-tint); border:1px solid #E9D9B8; color:#5C4823; padding:12px 16px; border-radius:var(--radius-s); font-size:13px; margin:0 20px 18px 20px; }
   .alert-box svg{ width:17px; height:17px; flex-shrink:0; margin-top:1px; }
@@ -332,7 +326,7 @@
         <div class="card">
           <div class="label">Pacientes cadastrados</div>
           <div class="value" id="kpi-pacientes">0</div>
-          <div class="hint">com prontuário ativo</div>
+          <div class="hint">com agendamento registrado</div>
         </div>
         <div class="card">
           <div class="label">Aguardando confirmação</div>
@@ -406,8 +400,8 @@
             <tr>
               <th>Paciente</th>
               <th>Telefone</th>
+              <th>E-mail</th>
               <th>Última visita</th>
-              <th>Alergias</th>
             </tr>
           </thead>
           <tbody id="tabela-pacientes"></tbody>
@@ -441,8 +435,6 @@
           <div class="field"><label for="cf-nasc">Data de nascimento</label><input id="cf-nasc" type="date"></div>
           <div class="field"><label for="cf-tel">Telefone</label><input id="cf-tel" type="tel" placeholder="(47) 99999-0000"></div>
           <div class="field"><label for="cf-email">E-mail</label><input id="cf-email" type="email" placeholder="nome@email.com"></div>
-          <div class="field full"><label for="cf-alergias">Alergias / restrições</label><input id="cf-alergias" type="text" placeholder="Ex.: alergia a látex, pele sensível a ácidos"></div>
-          <div class="field full"><label for="cf-obs">Observações gerais</label><textarea id="cf-obs" placeholder="Histórico relevante, preferências, contraindicações..."></textarea></div>
         </div>
       </div>
     </section>
@@ -491,18 +483,7 @@
           <div class="field"><label for="pf-nasc">Data de nascimento</label><input id="pf-nasc" type="date"></div>
           <div class="field"><label for="pf-tel">Telefone</label><input id="pf-tel" type="tel" placeholder="(47) 99999-0000"></div>
           <div class="field"><label for="pf-email">E-mail</label><input id="pf-email" type="email" placeholder="nome@email.com"></div>
-          <div class="field full"><label for="pf-alergias">Alergias / restrições</label><input id="pf-alergias" type="text" placeholder="Ex.: alergia a látex, pele sensível a ácidos"></div>
-          <div class="field full"><label for="pf-obs">Observações gerais</label><textarea id="pf-obs" placeholder="Histórico relevante, preferências, contraindicações..."></textarea></div>
         </div>
-      </div>
-
-      <div class="panel" id="painel-historico">
-        <div class="panel-head">
-          <h2>Histórico de procedimentos</h2>
-          <button class="btn btn-ghost btn-sm" id="btn-add-historico">+ Adicionar procedimento</button>
-        </div>
-        <div id="lista-historico"></div>
-        <div class="empty-state" id="historico-vazio" style="display:none;">Nenhum procedimento registrado ainda.</div>
       </div>
     </section>
 
@@ -563,39 +544,6 @@
   </div>
 </div>
 
-<!-- ===================== MODAL: NOVO ITEM DO HISTÓRICO ===================== -->
-<div class="overlay" id="overlay-historico">
-  <div class="modal">
-    <div class="modal-head">
-      <h3>Adicionar procedimento ao prontuário</h3>
-      <button class="modal-close" data-close-modal="overlay-historico">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="field">
-        <label for="hi-data">Data</label>
-        <input type="date" id="hi-data">
-      </div>
-      <div class="field">
-        <label for="hi-servico">Procedimento realizado</label>
-        <select id="hi-servico"></select>
-      </div>
-      <div class="field">
-        <label for="hi-profissional">Profissional responsável</label>
-        <select id="hi-profissional"></select>
-      </div>
-      <div class="field">
-        <label for="hi-obs">Observações clínicas</label>
-        <textarea id="hi-obs" placeholder="Reação da pele, produtos utilizados, recomendações..."></textarea>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" data-close-modal="overlay-historico">Cancelar</button>
-      <button class="btn btn-primary" id="btn-confirmar-historico">Adicionar ao prontuário</button>
-    </div>
-  </div>
-</div>
 
 <!-- ===================== MODAL: NOVO/EDITAR SERVIÇO ===================== -->
 <div class="overlay" id="overlay-servico">
@@ -670,25 +618,10 @@ function addDays(base, n){
 }
 
 let pacientes = [
-  { id: nextId(), nome:"Camila Duarte", nascimento:"1994-03-12", telefone:"(47) 99911-2233", email:"camila.duarte@email.com",
-    alergias:"Pele sensível a ácidos", obs:"Prefere horários no início da manhã.",
-    historico:[
-      {data: toISODate(addDays(hoje,-30)), servico:"Limpeza de pele", profissional:"Dra. Marina Alves", obs:"Boa resposta, sem irritação."},
-      {data: toISODate(addDays(hoje,-9)),  servico:"Peeling químico", profissional:"Dra. Marina Alves", obs:"Leve vermelhidão, orientada hidratação intensa por 3 dias."}
-    ]},
-  { id: nextId(), nome:"Fernanda Ribeiro", nascimento:"1989-07-22", telefone:"(47) 98822-1010", email:"fe.ribeiro@email.com",
-    alergias:"Nenhuma conhecida", obs:"",
-    historico:[
-      {data: toISODate(addDays(hoje,-60)), servico:"Botox", profissional:"Dra. Beatriz Souza", obs:"Aplicação em região frontal, retorno em 90 dias."}
-    ]},
-  { id: nextId(), nome:"Juliana Prado", nascimento:"1997-11-02", telefone:"(47) 99700-4455", email:"ju.prado@email.com",
-    alergias:"Alergia a látex", obs:"Usar luvas de nitrila em todos os procedimentos.",
-    historico:[] },
-  { id: nextId(), nome:"Patrícia Nunes", nascimento:"1985-05-30", telefone:"(47) 99333-7788", email:"patricia.nunes@email.com",
-    alergias:"Nenhuma conhecida", obs:"",
-    historico:[
-      {data: toISODate(addDays(hoje,-14)), servico:"Drenagem linfática", profissional:"Dr. Rafael Lima", obs:"Sessão 1 de 6, boa tolerância."}
-    ]}
+  { id: nextId(), nome:"Camila Duarte", nascimento:"1994-03-12", telefone:"(47) 99911-2233", email:"camila.duarte@email.com" },
+  { id: nextId(), nome:"Fernanda Ribeiro", nascimento:"1989-07-22", telefone:"(47) 98822-1010", email:"fe.ribeiro@email.com" },
+  { id: nextId(), nome:"Juliana Prado", nascimento:"1997-11-02", telefone:"(47) 99700-4455", email:"ju.prado@email.com" },
+  { id: nextId(), nome:"Patrícia Nunes", nascimento:"1985-05-30", telefone:"(47) 99333-7788", email:"patricia.nunes@email.com" }
 ];
 
 let agendamentos = [
@@ -942,12 +875,6 @@ function popularSelects(){
   servicos.forEach(s=> selServico.appendChild(new Option(s.nome, s.nome)));
   PROFISSIONAIS.forEach(p=> selProf.appendChild(new Option(p, p)));
   HORAS.forEach(h=> selHora.appendChild(new Option(h, h)));
-
-  const selServicoHi = document.getElementById("hi-servico");
-  const selProfHi = document.getElementById("hi-profissional");
-  selServicoHi.innerHTML = ""; selProfHi.innerHTML = "";
-  servicos.forEach(s=> selServicoHi.appendChild(new Option(s.nome, s.nome)));
-  PROFISSIONAIS.forEach(p=> selProfHi.appendChild(new Option(p, p)));
 }
 
 function abrirNovoAgendamento(dataISO, hora){
@@ -1023,8 +950,9 @@ function mudarStatus(id, status){
    PACIENTES — LISTA
    ========================================================= */
 function ultimaVisita(paciente){
-  if(paciente.historico.length===0) return "—";
-  const ultima = [...paciente.historico].sort((a,b)=> b.data.localeCompare(a.data))[0];
+  const relacionados = agendamentos.filter(a=> a.pacienteId===paciente.id);
+  if(relacionados.length===0) return "—";
+  const ultima = [...relacionados].sort((a,b)=> b.data.localeCompare(a.data))[0];
   return ultima.data.split("-").reverse().join("/");
 }
 
@@ -1052,8 +980,8 @@ function renderPacientes(filtro=""){
         </div>
       </td>
       <td class="muted">${p.telefone}</td>
+      <td class="muted">${p.email}</td>
       <td class="muted">${ultimaVisita(p)}</td>
-      <td class="muted">${p.alergias && p.alergias.toLowerCase()!=="nenhuma conhecida" ? p.alergias : "—"}</td>
     `;
     tr.addEventListener("click", ()=> abrirProntuario(p.id));
     corpo.appendChild(tr);
@@ -1069,7 +997,7 @@ document.getElementById("btn-voltar-pacientes-cadastro").addEventListener("click
    CADASTRO DE PACIENTE (tela simples, só dados pessoais)
    ========================================================= */
 function abrirCadastro(){
-  ["cf-nome","cf-nasc","cf-tel","cf-email","cf-alergias","cf-obs"].forEach(f=> document.getElementById(f).value = "");
+  ["cf-nome","cf-nasc","cf-tel","cf-email"].forEach(f=> document.getElementById(f).value = "");
   irPara("cadastro");
 }
 
@@ -1083,9 +1011,6 @@ document.getElementById("btn-salvar-cadastro").addEventListener("click", ()=>{
     nascimento: document.getElementById("cf-nasc").value,
     telefone: document.getElementById("cf-tel").value.trim(),
     email: document.getElementById("cf-email").value.trim(),
-    alergias: document.getElementById("cf-alergias").value.trim(),
-    obs: document.getElementById("cf-obs").value.trim(),
-    historico: []
   };
   pacientes.push(novo);
   mostrarToast("Paciente cadastrado");
@@ -1104,30 +1029,7 @@ function abrirProntuario(id){
   document.getElementById("pf-nasc").value = p.nascimento;
   document.getElementById("pf-tel").value = p.telefone;
   document.getElementById("pf-email").value = p.email;
-  document.getElementById("pf-alergias").value = p.alergias;
-  document.getElementById("pf-obs").value = p.obs;
-  renderHistorico(p);
   irPara("prontuario");
-}
-
-function renderHistorico(p){
-  const lista = document.getElementById("lista-historico");
-  const vazio = document.getElementById("historico-vazio");
-  const itens = [...p.historico].sort((a,b)=> b.data.localeCompare(a.data));
-  lista.innerHTML = "";
-  vazio.style.display = itens.length ? "none" : "block";
-  itens.forEach(h=>{
-    const div = document.createElement("div");
-    div.className = "historico-item";
-    div.innerHTML = `
-      <div class="h-data">${h.data.split("-").reverse().join("/")}</div>
-      <div class="h-body">
-        <div class="h-serv">${h.servico} · ${h.profissional}</div>
-        ${h.obs ? `<div class="h-obs">${h.obs}</div>` : ""}
-      </div>
-    `;
-    lista.appendChild(div);
-  });
 }
 
 document.getElementById("btn-salvar-paciente").addEventListener("click", ()=>{
@@ -1139,33 +1041,11 @@ document.getElementById("btn-salvar-paciente").addEventListener("click", ()=>{
     nascimento: document.getElementById("pf-nasc").value,
     telefone: document.getElementById("pf-tel").value.trim(),
     email: document.getElementById("pf-email").value.trim(),
-    alergias: document.getElementById("pf-alergias").value.trim(),
-    obs: document.getElementById("pf-obs").value.trim(),
   };
 
   const p = pacientes.find(x=>x.id===paginaAtualPacienteId);
   Object.assign(p, dados);
   mostrarToast("Dados atualizados");
-});
-
-document.getElementById("btn-add-historico").addEventListener("click", ()=>{
-  document.getElementById("hi-data").value = hojeISO;
-  abrirModal("overlay-historico");
-});
-
-document.getElementById("btn-confirmar-historico").addEventListener("click", ()=>{
-  if(paginaAtualPacienteId === null) return;
-  const p = pacientes.find(x=>x.id===paginaAtualPacienteId);
-  p.historico.push({
-    data: document.getElementById("hi-data").value || hojeISO,
-    servico: document.getElementById("hi-servico").value,
-    profissional: document.getElementById("hi-profissional").value,
-    obs: document.getElementById("hi-obs").value.trim()
-  });
-  document.getElementById("hi-obs").value = "";
-  fecharModal("overlay-historico");
-  renderHistorico(p);
-  mostrarToast("Procedimento adicionado ao prontuário");
 });
 
 /* =========================================================
