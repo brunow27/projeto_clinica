@@ -62,7 +62,7 @@ O protótipo é estático (HTML/CSS/JS puro, sem dependências) e está dividido
 
 ### `index.html` — área administrativa autenticada (protótipo)
 - **Painel** — resumo do dia, com atalho para novo agendamento
-- **Agenda** — visão semanal por horário; clicar em um horário livre abre o modal de novo agendamento; clicar em uma consulta existente mostra detalhes com opções de confirmar/cancelar (RF11)
+- **Agenda** — visão semanal por horário; clicar em um horário livre abre o modal de novo agendamento; clicar em uma consulta existente mostra detalhes com opções de confirmar/cancelar; ao cancelar, o horário volta a ficar livre e pode ser reagendado (RF11)
 - **Pacientes** — lista com busca por nome/telefone
 - **Serviços** — cadastro, edição e remoção de procedimentos e preços, refletidos na lista usada pelos formulários de agendamento (RF10)
 - **Cadastro** — formulário simples para registrar um novo paciente (dados pessoais)

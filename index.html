@@ -581,18 +581,19 @@
    DADOS EM MEMÓRIA (simulando um backend, apenas para o protótipo)
    ========================================================= */
 let servicos = [
-  { id: 1, nome:"Limpeza de pele",        preco: 150 },
-  { id: 2, nome:"Peeling químico",        preco: 220 },
-  { id: 3, nome:"Botox",                  preco: null },
-  { id: 4, nome:"Preenchimento labial",   preco: null },
-  { id: 5, nome:"Drenagem linfática",     preco: 130 },
-  { id: 6, nome:"Microagulhamento",       preco: 250 },
-  { id: 7, nome:"Depilação a laser",      preco: 90 },
+  { id: 1, nome:"Design sobrancelhas", preco: null },
+  { id: 2, nome:"Brow lamination", preco: null },
+  { id: 3, nome:"Micropigmentação de sobrancelhas", preco: null },
+  { id: 4, nome:"Limpeza de pele", preco: null },
+  { id: 5, nome:"Dermaplaning", preco: null },
+  { id: 6, nome:"Peeling de diamante", preco: null },
+  { id: 7, nome:"Reconstrução capilar", preco: null },
+  { id: 8, nome:"Remoção a laser", preco: null },
 ];
 let servicoSelecionadoId = null;
 // SERVICOS mantém compatibilidade com o restante do protótipo (selects de procedimento)
 function SERVICOS_NOMES(){ return servicos.map(s=>s.nome); }
-const PROFISSIONAIS = ["Dra. Marina Alves","Dra. Beatriz Souza","Dr. Rafael Lima"];
+const PROFISSIONAIS = ["Dra. Cleidiane Petry"];
 const HORAS = ["08:00","09:00","10:00","11:00","13:00","14:00","15:00","16:00","17:00","18:00"];
 
 let seq = 1000;
@@ -625,11 +626,11 @@ let pacientes = [
 ];
 
 let agendamentos = [
-  { id: nextId(), pacienteId: pacientes[0].id, servico:"Limpeza de pele", profissional:"Dra. Marina Alves", data: hojeISO, hora:"09:00", status:"confirmado" },
-  { id: nextId(), pacienteId: pacientes[1].id, servico:"Botox", profissional:"Dra. Beatriz Souza", data: hojeISO, hora:"11:00", status:"pendente" },
-  { id: nextId(), pacienteId: pacientes[3].id, servico:"Drenagem linfática", profissional:"Dr. Rafael Lima", data: toISODate(addDays(hoje,1)), hora:"14:00", status:"confirmado" },
-  { id: nextId(), pacienteId: pacientes[2].id, servico:"Peeling químico", profissional:"Dra. Marina Alves", data: toISODate(addDays(hoje,2)), hora:"10:00", status:"pendente" },
-  { id: nextId(), pacienteId: pacientes[0].id, servico:"Microagulhamento", profissional:"Dra. Marina Alves", data: toISODate(addDays(hoje,-2)), hora:"15:00", status:"cancelado" },
+  { id: nextId(), pacienteId: pacientes[0].id, servico:"Limpeza de pele", profissional:"Dra. Cleidiane Petry", data: hojeISO, hora:"09:00", status:"confirmado" },
+  { id: nextId(), pacienteId: pacientes[1].id, servico:"Design sobrancelhas", profissional:"Dra. Cleidiane Petry", data: hojeISO, hora:"11:00", status:"pendente" },
+  { id: nextId(), pacienteId: pacientes[3].id, servico:"Brow lamination", profissional:"Dra. Cleidiane Petry", data: toISODate(addDays(hoje,1)), hora:"14:00", status:"confirmado" },
+  { id: nextId(), pacienteId: pacientes[2].id, servico:"Peeling de diamante", profissional:"Dra. Cleidiane Petry", data: toISODate(addDays(hoje,2)), hora:"10:00", status:"pendente" },
+  { id: nextId(), pacienteId: pacientes[0].id, servico:"Dermaplaning", profissional:"Dra. Cleidiane Petry", data: toISODate(addDays(hoje,-2)), hora:"15:00", status:"cancelado" },
 ];
 
 let agendaSemanaBase = startOfWeek(hoje);
@@ -827,7 +828,9 @@ function renderAgenda(){
     grid.appendChild(el(`<div class="cal-time">${hora}</div>`));
     dias.forEach(d=>{
       const dataISO = toISODate(d);
-      const appt = agendamentos.find(a=>a.data===dataISO && a.hora===hora);
+      // Um horário cancelado volta a ficar livre: a consulta ativa (se houver) tem prioridade sobre a cancelada.
+      const doHorario = agendamentos.filter(a=>a.data===dataISO && a.hora===hora);
+      const appt = doHorario.find(a=>a.status!=="cancelado") || doHorario.find(a=>a.status==="cancelado");
       const cell = document.createElement("div");
       cell.className = "cal-cell" + (appt ? " has-appt" : "");
       if(appt){
@@ -840,7 +843,8 @@ function renderAgenda(){
           e.stopPropagation();
           abrirDetalheAgendamento(appt.id);
         });
-      } else {
+      }
+      if(!appt || appt.status==="cancelado"){
         cell.addEventListener("click", ()=> abrirNovoAgendamento(dataISO, hora));
       }
       grid.appendChild(cell);
@@ -877,11 +881,13 @@ function popularSelects(){
   HORAS.forEach(h=> selHora.appendChild(new Option(h, h)));
 }
 
-function abrirNovoAgendamento(dataISO, hora){
+function abrirNovoAgendamento(dataISO, hora, pacienteId, servico){
   popularSelects();
   document.getElementById("modal-agendamento-titulo").textContent = "Novo agendamento";
   document.getElementById("ag-data").value = dataISO || hojeISO;
   if(hora) document.getElementById("ag-hora").value = hora;
+  if(pacienteId) document.getElementById("ag-paciente").value = pacienteId;
+  if(servico) document.getElementById("ag-servico").value = servico;
   abrirModal("overlay-agendamento");
 }
 document.getElementById("btn-novo-agendamento").addEventListener("click", ()=> abrirNovoAgendamento(hojeISO, null));
@@ -919,7 +925,12 @@ function abrirDetalheAgendamento(id){
   `;
   const acoes = document.getElementById("detalhe-acoes");
   acoes.innerHTML = "";
-  if(a.status !== "cancelado"){
+  if(a.status === "cancelado"){
+    acoes.appendChild(botaoAcao("Reagendar neste horário", "btn-primary", ()=>{
+      fecharModal("overlay-detalhe");
+      abrirNovoAgendamento(a.data, a.hora, a.pacienteId, a.servico);
+    }));
+  } else {
     if(a.status === "pendente"){
       acoes.appendChild(botaoAcao("Confirmar", "btn-primary", ()=> mudarStatus(a.id, "confirmado")));
     }
